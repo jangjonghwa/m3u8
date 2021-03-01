@@ -14,15 +14,16 @@ cd m3u8
 python3 -m pip install -r requirements.txt
 ```
 ## usage
-In the directory that contains scrapy.cfg.
+In the directory that contains `scrapy.cfg`.
 ```bash
-scrapy crawl m3u8 -a m3u8='m3u8 file url' [-a merge='anything will prevent spider from merging video fragments']
+scrapy crawl m3u8 -a m3u8='m3u8 file url' [-a merge=...] [-a referer=...]
 ```
 or
 ```bash
-scrapy crawl m3u8 -a page='static html page that contains m3u8 file url'[-a merge=...]
+scrapy crawl m3u8 -a page='html page url' [-a merge=...]
 ```
-You can also merge video fragments manually, because you may remove some head or tail fragments which sometimes contain ads
+* Assign anything to `merge` to prevent the spider from merging fragments. This is useful when some head or tail fragments contain ads. Once you remove these .ts files, you can merge video fragments manually:
 ```bash
-python m3u8/merge_ts.py 'directory that contains all video fragments'
+python3 m3u8/merge_ts.py 'directory that contains all video fragments'
 ```
+* Only assign STATIC html page that contains m3u8 file URL to `page`. Note that this is not always the case, so you may F12 first to get the m3u8 URL, then set `m3u8` (and `referer` if needed).

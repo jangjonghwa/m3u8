@@ -19,10 +19,11 @@ class m3u8_Spider(scrapy.Spider):
     def start_requests(self):
         m3u8 = getattr(self, 'm3u8', None)
         page = getattr(self, 'page', None)
+        referer = getattr(self, 'referer', None)
         self.merge = getattr(self, 'merge', True)
         # 根据参数类型决定爬取内容
         if m3u8:
-            yield scrapy.Request(url=m3u8, callback=self.parse_m3u8)
+            yield scrapy.Request(url=m3u8, callback=self.parse_m3u8, headers={'Referer': referer})
         elif page:
             yield scrapy.Request(url=page, callback=self.parse_page)
         else:
