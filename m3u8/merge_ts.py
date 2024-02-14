@@ -12,8 +12,12 @@ def merge(directory):
     with open(f'{directory}.ts', 'wb') as f:
         for n in range(start, end):
             file_path = os.path.join(directory, f'{n}.ts')
-            with open(file_path, 'rb') as g:
-                f.write(g.read())
+            try:
+                with open(file_path, 'rb') as g:
+                    f.write(g.read())
+            except:
+                print('not found ', file_path)
+            
 
 
 if __name__ == '__main__':

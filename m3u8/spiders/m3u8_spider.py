@@ -21,9 +21,10 @@ class m3u8_Spider(scrapy.Spider):
         page = getattr(self, 'page', None)
         referer = getattr(self, 'referer', None)
         self.merge = getattr(self, 'merge', True)
+        self.referer = referer
         # 根据参数类型决定爬取内容
         if m3u8:
-            yield scrapy.Request(url=m3u8, callback=self.parse_m3u8, headers={'Referer': referer})
+            yield scrapy.Request(url=m3u8, callback=self.parse_m3u8, headers={'Referer': referer}, meta={'download_timeout': 60})
         elif page:
             yield scrapy.Request(url=page, callback=self.parse_page)
         else:
@@ -58,8 +59,12 @@ class m3u8_Spider(scrapy.Spider):
             self.iv = bytes.fromhex(match.group(1)) if match else None
         else:
             self.key = None
-        self.file_names = re.findall(
-            r'\S+\.ts\S*', response.text)  # m3u8包含的ts片段名
+        self.file_names = re.findall(r'\S+\.ts\S*', response.text)  # m3u8包含的ts片段名
+        if self.file_names:
+            self.logger.info(f'.ts found')
+        else:
+            self.logger.info(f'.ts not found. .txt finding')
+            self.file_names = re.findall(r'\S+\.txt\S*', response.text)  # m3u8包含的ts片段名
         self.directory = hashlib.md5(
             current_url.encode('utf-8')).hexdigest()  # ts片段存储目录
         if not os.path.exists(self.directory):
@@ -70,7 +75,7 @@ class m3u8_Spider(scrapy.Spider):
             if os.path.exists(file_path):
                 self.logger.info(f'{i}.ts already crawled')
                 continue
-            yield response.follow(file_name, callback=self.parse_ts, meta={'file_path': file_path})
+            yield response.follow(file_name, callback=self.parse_ts, headers={'Referer': self.referer}, meta={'file_path': file_path, 'download_timeout': 60})
 
     def parse_ts(self, response):
         data = response.body
